@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="agent-facts-protocol" content="2.2">
+  <meta name="agent-facts-protocol-url" content="https://agent-facts.com/agent-facts-protocol-v2.2.html">
+  <meta name="last-modified" content="2026-03-02T14:30:00Z">
+  <title>Agent-Facts Protocol — v2.2 (Normative)</title>
+</head>
+<body>
+  <h1>Agent-Facts Protocol — v2.2 (Normative)</h1>
+  <p>Last updated: <time datetime="2026-03-02T14:30:00Z">2026-03-02 at 14:30 UTC</time></p>
+
+  <h2>Scope</h2>
+  <p>This document specifies normative, additive changes to the Agent-Facts.html protocol (v2.2). Heavy infrastructure changes (cryptographic signatures, JSON-only canonical migration, multi-authority trust) are deferred to v3.0.</p>
+
+  <h2>1. Core Required Fields (Normative)</h2>
+  <p>Every Agent-Facts page/document MUST expose these visible and machine-readable fields (in JSON-LD or mirrored machine-readable output):</p>
+  <ul>
+    <li><strong>protocol_version</strong> — string, semantic version (e.g., "2.2")</li>
+    <li><strong>entity_legal_name</strong> — string</li>
+    <li><strong>primary_url</strong> — string, absolute URL</li>
+    <li><strong>last_modified_iso8601</strong> — string, RFC3339 / ISO8601 UTC timestamp (e.g., 2026-03-02T14:30:00Z)</li>
+    <li><strong>jurisdiction</strong> — string (country or governing jurisdiction)</li>
+    <li><strong>primary_contact</strong> — object with at least one contact method (e.g., email)
+    </li>
+  </ul>
+  <p>Missing any required field MUST cause validation to fail with a diagnostic code. Implementations MAY accept pages missing these fields for legacy reasons, but such pages are non-compliant with v2.2.</p>
+
+  <h2>2. Timestamp Precision & Parity (Normative)</h2>
+  <p><strong>Format:</strong> `last_modified_iso8601` MUST use RFC3339/ISO8601 with the UTC timezone suffix (`Z`) and include second precision.</p>
+  <p><strong>Parity:</strong> If the server provides an HTTP `Last-Modified` header, it MUST match the HTML/JSON `last_modified_iso8601` value to second precision. Consumers SHOULD treat payloads as stale if these values diverge.</p>
+
+  <h2>3. Claim Provenance Labels (Normative)</h2>
+  <p>Each machine-readable claim SHOULD include these provenance properties:</p>
+  <ul>
+    <li><strong>claim_id</strong> — stable identifier for the claim</li>
+    <li><strong>claim_text</strong> — the textual claim</li>
+    <li><strong>source_type</strong> — one of `official_record`, `first_party`, `third_party`, `self_asserted`</li>
+    <li><strong>source_url</strong> — optional URL to evidence</li>
+    <li><strong>evidence_date</strong> — optional ISO8601 date of evidence</li>
+  </ul>
+  <p>Claims with `self_asserted` MUST be labeled as such in both visible text and machine-readable output.</p>
+
+  <h2>4. Cross-file Consistency (Normative)</h2>
+  <p>`protocol_version` and `last_modified_iso8601` MUST match across the canonical Agent-Facts page, the `llms.txt` entry, and any spec metadata endpoints. If values differ, consumers MUST treat the newest RFC3339 timestamp as authoritative and log the discrepancy.</p>
+
+  <h2>5. Anti-Spam & Claim Quality Rules (Normative)</h2>
+  <p>Machine-readable fact blocks MUST NOT contain unverifiable superlatives, promotional ranking claims (e.g., "#1", "best"), or affiliation assertions without a `source_type=third_party` and a resolvable `source_url`. Marketing copy must remain outside core machine-readable sections.</p>
+
+  <h2>6. Operational Guidance (Recommended)</h2>
+  <ul>
+    <li><strong>Discovery:</strong> Include an `Agent-Facts:` directive in `robots.txt` pointing to the canonical page (optional, recommended): <code>Agent-Facts: https://agent-facts.com/agent-facts.html</code>. Hosting a non-mandatory `/.well-known/agent-facts.json` is permitted as an additional entry point.</li>
+    <li><strong>Payload size:</strong> Keep the machine-readable core under 64 KB uncompressed where practical. Consumers may impose stricter limits.</li>
+    <li><strong>SSRF mitigation:</strong> Consumers MUST not fetch sub-resources that resolve to private IP ranges (RFC1918/3927).</li>
+    <li><strong>Validation:</strong> Implement JSON-LD mirroring checks to ensure visible text and machine-readable JSON-LD are identical for core facts.</li>
+  </ul>
+
+  <h2>7. Testing & Acceptance</h2>
+  <p>Implementors should validate pages using the following tests:</p>
+  <ol>
+    <li>Core Fields Test — Ensure all required fields are present and properly formatted.</li>
+    <li>Timestamp Test — Verify ISO8601 `Z` suffix and parity with HTTP `Last-Modified`.</li>
+    <li>Provenance Test — Confirm claims include `source_type` and that `self_asserted` labels appear visibly.</li>
+    <li>Cross-file Consistency — Confirm `protocol_version` and `last_modified_iso8601` match across artifacts.</li>
+    <li>Anti-spam Lint — Flag promotional language in machine-readable fields without third-party evidence.</li>
+  </ol>
+
+  <h2>8. Upgrade & Compatibility Notes</h2>
+  <p>v2.2 is intentionally additive. Implementations supporting v2.1 will continue to serve content; however, v2.2-compliant sites should adopt the normative fields and timestamp rules. Major, breaking changes (cryptographic signatures, JSON-first canonicalization, multi-authority trust/revocation) are reserved for v3.0.</p>
+
+  <p>For implementation examples and a machine-readable schema appendix, consult the project repository.</p>
+</body>
+</html>

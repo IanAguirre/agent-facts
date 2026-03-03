@@ -1,3 +1,5 @@
+Agent-Facts: https://agent-facts.com/agent-facts.html
+
 User-agent: GPTBot
 Allow: /
 
