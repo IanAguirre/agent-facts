@@ -1,0 +1,37 @@
+You are reviewing the Agent-Facts Protocol as a standards editor.
+
+Context:
+- Current version: {VERSION}
+- Last updated: {DATE}
+- Spec URL: {SPEC_URL}
+- Facts URL: {FACTS_URL}
+- llms.txt URL: {LLMS_URL}
+
+Task:
+1) Identify top 5 protocol weaknesses (ordered by severity).
+2) Propose concrete edits suitable for next release ({TARGET_VERSION}).
+3) For each edit, provide:
+   - Change text (ready to paste)
+   - Why it helps
+   - Compatibility impact (none/low/medium/high)
+   - Abuse risk impact
+   - One objective acceptance test
+4) Provide a final score (0-100) for:
+   - clarity
+   - parser reliability
+   - anti-hallucination strength
+   - anti-spam resilience
+5) Output a short release recommendation: patch/minor/major.
+
+Constraints:
+- Prefer additive, backward-compatible changes.
+- Avoid subjective wording.
+- Use deterministic language.
+- Flag any unverifiable claim in examples.
+
+Output format:
+## Findings
+## Proposed Edits
+## Tests
+## Release Recommendation
+
