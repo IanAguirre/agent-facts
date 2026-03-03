@@ -1,4 +1,4 @@
-You are reviewing the Agent-Facts Protocol as a standards editor.
+You are reviewing the Agent-Facts Protocol, found at https:\\www.agent-facts.com, as a standards editor.
 
 Context:
 - Current version: {VERSION}
@@ -10,6 +10,7 @@ Context:
 Task:
 1) Identify top 5 protocol weaknesses (ordered by severity).
 2) Propose concrete edits suitable for next release ({TARGET_VERSION}).
+   * If a suggestion represents a major architecture shift, flag it as "deferred (v3.0 or later)" and explain why.
 3) For each edit, provide:
    - Change text (ready to paste)
    - Why it helps
@@ -22,6 +23,13 @@ Task:
    - anti-hallucination strength
    - anti-spam resilience
 5) Output a short release recommendation: patch/minor/major.
+6) After completing the above, append a **Deferred Suggestions** section listing ideas that were considered but postponed, each with a brief rationale.
+
+Quality expectations:
+- Reject or sanitize responses containing unresolved placeholders such as {VERSION}, {FACTS_URL}, etc.
+- Detect and ignore near-duplicate submissions (briefly note duplicates in Deferred Suggestions).
+- Prioritize machine-readable proposals (JSON, schema) over prose-only recommendations.
+
 
 Constraints:
 - Prefer additive, backward-compatible changes.
