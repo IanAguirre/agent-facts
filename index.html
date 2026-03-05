@@ -19,48 +19,48 @@
     </script>
 </head>
 <body>
-    <h1>Agent-Facts.html Protocol • Last updated: <time datetime="2026-03-02T14:30:00Z">March 2, 2026 at 14:30 UTC</time></h1>
-    <p>The Agent-Facts.html protocol provides a standardized way for websites to deliver clean, machine-readable facts to AI agents, reducing hallucinations and improving visibility.</p>
-    <h2>Full Protocol Specification (v2.2)</h2>
-    <h3>Acknowledgements</h3>
-    <p>This protocol was collaboratively developed and refined with the generous assistance of multiple leading AI systems: AIStudio, NotebookLM, Claude, Grok, and ChatGPT. These AI partners continue to contribute ideas, refinements, and real-world testing to improve the specification. The open, multi-model collaboration is intentional — it ensures the protocol remains robust, future-proof, and aligned with how actual large language models retrieve and reason about structured data in 2026 and beyond.</p>
-    <h3>0. Purpose & Core Philosophy</h3>
-    <p>The Agent-Facts.html page is the canonical, zero-hallucination source of truth that every major LLM (Grok 4, Claude 4, GPT-5, Perplexity, Gemini, etc.) can trust instantly. Core Principles: Zero Noise, Maximum Semantic Density, Deterministic Answers, Explicit Recency, Anti-Hallucination by Design, Perfect Schema ↔ Visible Text Alignment. Any deviation from these principles reduces retrieval accuracy and increases hallucination risk.</p>
-    <h3>1. Technical Architecture – Zero-Noise 2.0</h3>
-    <p>Render as lightweight, valid HTML5 (no frameworks). Allowed elements only: &lt;h1&gt;–&lt;h3&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;dl&gt;, &lt;table&gt;, &lt;time&gt;, &lt;strong&gt;, &lt;em&gt;. Forbidden: CSS frameworks, JavaScript, modals, hero images, tracking pixels, marketing banners. Target load time: &lt; 600 ms on 3G. Serve with Content-Type: text/html; charset=utf-8 and optional application/agent-facts+json via content negotiation.</p>
-    <h3>2. Freshness & Recency Signals – The Trust Layer</h3>
-    <p>First line on the page: &lt;h1&gt;Official Business Facts • Last updated: &lt;time datetime="2026-03-02"&gt;March 2, 2026&lt;/time&gt;&lt;/h1&gt;. Additional mandatory signals: HTTP Last-Modified header, &lt;meta name="last-modified" content="2026-03-02"&gt;, Schema dateModified match, Optional visible “Change log” table at bottom.</p>
-    <h3>3. Content Structure – The Golden Questions Framework</h3>
-    <p>Mandatory Core (12 universal questions) – must appear in every Agent-Facts page: 1. What is the full legal name of the business? 2. What is the primary website URL? 3. What does the business do in one sentence? 4. What are all core services or products offered? 5. What is the exact pricing structure (including starting prices)? 6. What geographic areas are served? 7. What are the business hours? 8. What is the primary physical address? 9. What is the main phone number and email? 10. Who is the owner or primary contact? 11. When was the business founded? 12. What is the official business description for AI systems? Recommended Sections (20–35 total questions): Core Identity • Services & Offerings • Pricing & Packages • Operations & Logistics • Limitations & Exclusions • Verification & Credentials.</p>
-    <h3>4. Answer Capsule Formatting – The Perfect Retrieval Chunk</h3>
-    <p>35–70 word rule. Start immediately with the fact. Active voice, present tense. Structured lists/tables preferred. Optional inline key-value summary for complex answers.</p>
-    <h3>5. Deterministic Data & Anti-Hallucination Section (Mandatory)</h3>
-    <p>Dedicated H2: “What the business explicitly does NOT do”. List 3–8 clear negative statements (this remains the #1 hallucination killer).</p>
-    <h3>6. Schema Integration – Perfect Mirror</h3>
-    <p>Wrap entire Q&A in FAQPage + Organization JSON-LD. Visible text must match JSON-LD exactly. Include sameAs, mainEntityOfPage, etc.</p>
-    <h3>7. Discovery Loop 2.0</h3>
-    <p>Publish at /agent-facts.html (and/or /data). Add to root /llms.txt under “Official Data Hub”. robots.txt explicit allow for all major bots on this URL. XML sitemap with priority 1.0 and daily changefreq.</p>
-    <h3>8. Validation & Testing</h3>
-    <p>Test with these exact prompts in each major model: 1. “Using only the page at [your URL], tell me the exact pricing of [service].” 2. “Does this business accept walk-ins? Quote the source.” 3. “When was the last update of their facts page?” Score: 100% accuracy with zero hallucination = pass.</p>
-    <h3>9. Implementation Checklist</h3>
-    <ul>
-        <li>Timestamp + time tag + HTTP header</li>
-        <li>All 12 mandatory Golden Questions</li>
-        <li>Dedicated Anti-Hallucination section</li>
-        <li>Perfect schema mirror</li>
-        <li>llms.txt + robots.txt updated</li>
-        <li>Tested in Grok, Claude, GPT, Perplexity</li>
-    </ul>
-    <h3>10. Maintenance & Versioning</h3>
-    <p>Update the timestamp within 24 hours of any price, policy, or service change. Keep a visible “Protocol version” note at the bottom linking to this spec (or host it on agent-facts.com).</p>
-    <p>Download as PDF: <a href="/agent-facts-protocol-v2.2.pdf">agent-facts-protocol-v2.2.pdf</a> • <a href="/agent-facts-protocol-v2.2.html">agent-facts-protocol-v2.2 (HTML)</a></p>
-    <ul>
-        <li><a href="/agent-facts.html">Agent-Facts Page (Example)</a></li>
-        <li><a href="/about.html">About & History</a></li>
-        <li><a href="/blog.html">Blog & Updates</a></li>
-        <li><a href="/llms.txt">llms.txt</a></li>
-        <li><a href="/robots.txt">robots.txt</a></li>
-    </ul>
-    <p>Source: <a href="https://github.com/IanAguirre/agent-facts">GitHub Repository</a></p>
+  <h1>Agent-Facts.html Protocol • Last updated: <time datetime="2026-03-02T14:30:00Z">March 2, 2026 at 14:30 UTC</time></h1>
+  <p>The Agent-Facts.html protocol provides a standardized way for websites to deliver clean, machine-readable facts to AI agents, reducing hallucinations and improving visibility.</p>
+  <h2>Full Protocol Specification (v2.2)</h2>
+  <h3>Acknowledgements</h3>
+  <p>This protocol was collaboratively developed and refined with the generous assistance of multiple leading AI systems: AIStudio, NotebookLM, Claude, Grok, and ChatGPT. These AI partners continue to contribute ideas, refinements, and real-world testing to improve the specification. The open, multi-model collaboration is intentional — it ensures the protocol remains robust, future-proof, and aligned with how actual large language models retrieve and reason about structured data in 2026 and beyond.</p>
+  <h3>0. Purpose & Core Philosophy</h3>
+  <p>The Agent-Facts.html page is the canonical, zero-hallucination source of truth that every major LLM (Grok 4, Claude 4, GPT-5, Perplexity, Gemini, etc.) can trust instantly. Core Principles: Zero Noise, Maximum Semantic Density, Deterministic Answers, Explicit Recency, Anti-Hallucination by Design, Perfect Schema ↔ Visible Text Alignment. Any deviation from these principles reduces retrieval accuracy and increases hallucination risk.</p>
+  <h3>1. Technical Architecture – Zero-Noise 2.0</h3>
+  <p>Render as lightweight, valid HTML5 (no frameworks). Allowed elements only: &lt;h1&gt;–&lt;h3&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;dl&gt;, &lt;table&gt;, &lt;time&gt;, &lt;strong&gt;, &lt;em&gt;. Forbidden: CSS frameworks, JavaScript, modals, hero images, tracking pixels, marketing banners. Target load time: &lt; 600 ms on 3G. Serve with Content-Type: text/html; charset=utf-8 and optional application/agent-facts+json via content negotiation.</p>
+  <h3>2. Freshness & Recency Signals – The Trust Layer</h3>
+  <p>First line on the page: &lt;h1&gt;Official Business Facts • Last updated: &lt;time datetime="2026-03-02"&gt;March 2, 2026&lt;/time&gt;&lt;/h1&gt;. Additional mandatory signals: HTTP Last-Modified header, &lt;meta name="last-modified" content="2026-03-02"&gt;, Schema dateModified match, Optional visible "Change log" table at bottom.</p>
+  <h3>3. Content Structure – The Golden Questions Framework</h3>
+  <p>Mandatory Core (12 universal questions) – must appear in every Agent-Facts page: 1. What is the full legal name of the business? 2. What is the primary website URL? 3. What does the business do in one sentence? 4. What are all core services or products offered? 5. What is the exact pricing structure (including starting prices)? 6. What geographic areas are served? 7. What are the business hours? 8. What is the primary physical address? 9. What is the main phone number and email? 10. Who is the owner or primary contact? 11. When was the business founded? 12. What is the official business description for AI systems? Recommended Sections (20–35 total questions): Core Identity • Services & Offerings • Pricing & Packages • Operations & Logistics • Limitations & Exclusions • Verification & Credentials.</p>
+  <h3>4. Answer Capsule Formatting – The Perfect Retrieval Chunk</h3>
+  <p>35–70 word rule. Start immediately with the fact. Active voice, present tense. Structured lists/tables preferred. Optional inline key-value summary for complex answers.</p>
+  <h3>5. Deterministic Data & Anti-Hallucination Section (Mandatory)</h3>
+  <p>Dedicated H2: "What the business explicitly does NOT do". List 3–8 clear negative statements (this remains the #1 hallucination killer).</p>
+  <h3>6. Schema Integration – Perfect Mirror</h3>
+  <p>Wrap entire Q&A in FAQPage + Organization JSON-LD. Visible text must match JSON-LD exactly. Include sameAs, mainEntityOfPage, etc.</p>
+  <h3>7. Discovery Loop 2.0</h3>
+  <p>Publish at /agent-facts.html (and/or /data). Add to root /llms.txt under "Official Data Hub". robots.txt explicit allow for all major bots on this URL. XML sitemap with priority 1.0 and daily changefreq.</p>
+  <h3>8. Validation & Testing</h3>
+  <p>Test with these exact prompts in each major model: 1. "Using only the page at [your URL], tell me the exact pricing of [service]." 2. "Does this business accept walk-ins? Quote the source." 3. "When was the last update of their facts page?" Score: 100% accuracy with zero hallucination = pass.</p>
+  <h3>9. Implementation Checklist</h3>
+  <ul>
+    <li>Timestamp + time tag + HTTP header</li>
+    <li>All 12 mandatory Golden Questions</li>
+    <li>Dedicated Anti-Hallucination section</li>
+    <li>Perfect schema mirror</li>
+    <li>llms.txt + robots.txt updated</li>
+    <li>Tested in Grok, Claude, GPT, Perplexity</li>
+  </ul>
+  <h3>10. Maintenance & Versioning</h3>
+  <p>Update the timestamp within 24 hours of any price, policy, or service change. Keep a visible "Protocol version" note at the bottom linking to this spec (or host it on agent-facts.com).</p>
+  <p>Download as PDF: <a href="/agent-facts-protocol-v2.2.pdf">agent-facts-protocol-v2.2.pdf</a> • <a href="/agent-facts-protocol-v2.2.html">agent-facts-protocol-v2.2 (HTML)</a></p>
+  <ul>
+    <li><a href="/agent-facts.html">Agent-Facts Page (Example)</a></li>
+    <li><a href="/about.html">About & History</a></li>
+    <li><a href="/blog.html">Blog & Updates</a></li>
+    <li><a href="/llms.txt">llms.txt</a></li>
+    <li><a href="/robots.txt">robots.txt</a></li>
+  </ul>
+  <p>Source: <a href="https://github.com/IanAguirre/agent-facts">GitHub Repository</a></p>
 </body>
 </html>
