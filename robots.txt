@@ -1,4 +1,5 @@
-Agent-Facts: https://agent-facts.com/agent-facts.html
+# Optional custom extension (causes syntax warning in Google Search Console if uncommented)
+# Agent-Facts: https://agent-facts.com/agent-facts.html
 
 User-agent: GPTBot
 Allow: /
