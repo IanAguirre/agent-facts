@@ -1,0 +1,73 @@
+Findings
+1. No canonical schema contract: The protocol defines structure informally, but not a strict required-field set with machine-validatable constraints.
+2. Weak provenance model: Claims are not required to include evidence type/source URI, so unverifiable assertions can look authoritative.
+3. No version-negotiation signaling: Parsers cannot reliably discover compatibility rules (min_parser_version, deprecations, sunset dates).
+4. Ambiguous recency semantics: last-modified exists, but no required timezone/format rule across all artifacts (agent-facts.html, llms.txt, spec metadata).
+5. Insufficient abuse controls: No explicit policy for unverifiable superlatives, fake affiliations, or contradictory claims across pages.
+Proposed Edits
+1. Edit: Add normative "Core Required Fields" block
+* Change text (ready to paste):
+### Core Required Fields (Normative)
+Every `/agent-facts.html` document MUST include exactly one value for:
+`protocol_version`, `entity_legal_name`, `primary_url`, `last_modified_iso8601`, `jurisdiction`, `primary_contact`.
+`last_modified_iso8601` MUST match RFC 3339 format (e.g., `2026-03-03T00:00:00Z`).
+Missing required fields MUST cause validation failure.
+* Why it helps: Enables deterministic parsing and validation.
+* Compatibility impact: low
+* Abuse risk impact: medium reduction
+* One objective acceptance test: Validator fails if any required field is missing or duplicated.
+2. Edit: Add claim provenance requirements
+* Change text (ready to paste):
+### Claim Provenance (Normative)
+Each factual claim SHOULD include:
+`claim_id`, `claim_text`, `source_type` (`official_record|first_party|third_party|self_asserted`), `source_url` (if available), `evidence_date`.
+Claims marked `self_asserted` MUST be labeled as such in machine-readable output.
+* Why it helps: Separates verified facts from self-asserted statements.
+* Compatibility impact: low
+* Abuse risk impact: high reduction
+* One objective acceptance test: Any claim with source_type=self_asserted is emitted with explicit self-asserted label.
+3. Edit: Add compatibility and deprecation metadata
+* Change text (ready to paste):
+### Compatibility Metadata (Normative)
+Documents MUST declare:
+`protocol_version`, `min_parser_version`.
+Documents MAY declare:
+`deprecated_fields` (array), `sunset_date` (RFC 3339 date-time).
+Parsers MUST ignore unknown fields and MUST NOT fail on additive extensions.
+* Why it helps: Stabilizes upgrades and prevents parser breakage.
+* Compatibility impact: none
+* Abuse risk impact: low reduction
+* One objective acceptance test: Parser for v2.1 successfully parses document containing unknown additive fields.
+4. Edit: Add cross-file consistency rules
+* Change text (ready to paste):
+### Cross-File Consistency (Normative)
+`protocol_version` and `last_modified_iso8601` MUST match across:
+`/agent-facts.html`, `/llms.txt`, and canonical spec metadata.
+If values differ, consumers MUST treat the newest RFC 3339 timestamp as authoritative and log mismatch.
+* Why it helps: Reduces stale or conflicting signals.
+* Compatibility impact: low
+* Abuse risk impact: medium reduction
+* One objective acceptance test: CI fails when protocol_version differs between agent-facts.html and llms.txt.
+5. Edit: Add anti-spam policy
+* Change text (ready to paste):
+### Abuse and Integrity Policy (Normative)
+The following MUST NOT appear without third-party evidence URL:
+- superlative claims (`#1`, `best`, `most trusted`)
+- affiliations/certifications
+- regulatory/compliance assertions
+Unverifiable marketing claims MUST be excluded from machine-readable fact blocks.
+* Why it helps: Limits manipulation of AI retrieval.
+* Compatibility impact: low
+* Abuse risk impact: high reduction
+* One objective acceptance test: Lint rule flags banned claim classes lacking source_type=third_party and source_url.
+Tests
+* Schema validation test for required singleton fields.
+* RFC 3339 format test for last_modified_iso8601.
+* Provenance labeling test for self_asserted claims.
+* Backward-compatibility test with unknown additive fields.
+* Cross-file equality test (protocol_version, last_modified_iso8601).
+* Abuse lint test for superlatives/affiliations without third-party evidence.
+Release Recommendation
+minor (additive, backward-compatible normative constraints and validation rules).
+Flagged unverifiable-claim risk in current style of examples: founder identity, "official" status, and quality superlatives are unverifiable unless linked to independent evidence.
+

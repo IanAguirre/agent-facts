@@ -1,0 +1,103 @@
+Findings
+1. Lack of formal schema definition: The specification describes categories textually but provides no machine-readable JSON Schema, potentially causing implementation variances and parsing errors. Severity: High (impacts interoperability and reliability).
+2. Undefined conflict resolution for multi-authority signatures: Multi-authority verification is outlined, but no procedures for resolving contradictory signatures from different authorities. Severity: High (risks trust erosion and decision paralysis).
+3. Incomplete revocation mechanisms: Revocation status is mentioned in verification section, but no detailed protocol for signature revocation or authority disqualification. Severity: Medium (could allow persisted invalid metadata).
+4. Insufficient handling of stale metadata: TTL is defined, but no required behaviors for consumers when metadata expires or update mechanisms fail. Severity: Medium (may lead to use of outdated information).
+5. Limited guidelines for extensibility: Extensibility allows custom facts, but lacks requirements for documenting or versioning extensions, risking ecosystem fragmentation. Severity: Low (affects long-term maintainability but not immediate functionality).
+Proposed Edits
+Edit 1: Add Formal JSON Schema
+* Change text: Insert new Appendix B after Appendix A: Appendix B - JSON Schema Definition (v1.1) The AgentFacts schema is defined using JSON Schema draft-2020-12. The full schema is as follows:
+JSON
+{  
+  "$schema": "https://json-schema.org/draft/2020-12/schema",  
+  "$id": "https://agentfacts.org/schema/v1.1.json",  
+  "type": "object",  
+  "properties": {  
+    "core_identity": {  
+      "type": "object",  
+      "required": ["agent_id", "name", "version", "created", "last_updated", "ttl"],  
+      "properties": {  
+        "agent_id": {"type": "string"},  
+        "name": {"type": "string"},  
+        "version": {"type": "string"},  
+        "created": {"type": "string", "format": "date-time"},  
+        "last_updated": {"type": "string", "format": "date-time"},  
+        "ttl": {"type": "integer"}  
+      }  
+    },  
+    "baseline_model": {  
+      "type": "object",  
+      "required": ["foundation_model", "model_version", "model_provider"],  
+      "properties": {  
+        "foundation_model": {"type": "string"},  
+        "model_version": {"type": "string"},  
+        "model_provider": {"type": "string"},  
+        "training_data_sources": {"type": "array", "items": {"type": "string"}},  
+        "training_cutoff_date": {"type": "string", "format": "date-time"},  
+        "fine_tuning": {"type": "string"},  
+        "model_capabilities": {"type": "array", "items": {"type": "string"}},  
+        "known_limitations": {"type": "array", "items": {"type": "string"}},  
+        "bias_assessments": {"type": "object"},  
+        "safety_evaluations": {"type": "object"}  
+      }  
+    },  
+    // Additional properties for other categories follow similar structure...  
+    "extensibility": {  
+      "type": "object",  
+      "additionalProperties": true  
+    }  
+  },  
+  "required": ["core_identity", "baseline_model"]  
+}
+Implementations must validate against this schema.
+* Why it helps: Provides a machine-readable format for validation, reducing parsing inconsistencies and improving interoperability across implementations.
+* Compatibility impact: Low (additive; existing v1.0 metadata remains valid without schema validation).
+* Abuse risk impact: Reduces abuse by enforcing structure, preventing malformed metadata submissions.
+Edit 2: Define Conflict Resolution Procedure
+* Change text: Add new subsection 8.7 after 8.6: 8.7 Conflict Resolution in Multi-Authority Verification When signatures from multiple authorities conflict (e.g., differing confidence levels or claims), consumers must apply the following deterministic procedure:
+1. Aggregate signatures by section.
+2. Select the signature with the highest confidence level from whitelisted authorities.
+3. If ties occur, prioritize the most recent timestamp.
+4. If unresolved, reject the section and fall back to unverified status. Implementations must log conflicts and notify metadata owners.
+* Why it helps: Establishes a clear, deterministic process to handle discrepancies, maintaining trust and operational consistency.
+* Compatibility impact: None (additive guidance; does not alter existing verification mechanics).
+* Abuse risk impact: Mitigates abuse by preventing exploitation of conflicting signatures to inject false data.
+Edit 3: Specify Revocation Protocol
+* Change text: Expand section 5.2.9 (Verification) with: Revocation must follow this protocol:
+o Authorities issue revocation notices as signed JSON objects containing the original signature ID, revocation timestamp, and reason code (e.g., "compromised", "expired").
+o Consumers query a designated revocation endpoint (e.g., authority's /revocations endpoint) during validation.
+o Metadata includes a "revocation_check_url" field pointing to the authority's revocation list. Revoked signatures invalidate the associated section.
+* Why it helps: Provides a standardized method to invalidate compromised signatures, enhancing security and trust over time.
+* Compatibility impact: Low (additive fields and checks; existing metadata without revocation URLs assumes no revocations).
+* Abuse risk impact: Lowers risk by enabling quick invalidation of abused or fraudulent signatures.
+Edit 4: Add Stale Metadata Handling Requirements
+* Change text: Add to section 8.3 (Update Mechanisms): Consumers must handle stale metadata as follows:
+o If TTL expires and no update is available, mark the metadata as "stale" and restrict usage to read-only or low-trust operations.
+o Implementations must attempt at least one pull update before declaring staleness.
+o Owners must provide an "update_endpoint" URL in core_identity for automated refreshes.
+* Why it helps: Ensures consistent behavior when metadata ages, preventing reliance on outdated information.
+* Compatibility impact: Low (additive field and behaviors; existing systems can ignore without breaking).
+* Abuse risk impact: Reduces risk of abusing expired metadata for persistent false claims.
+Edit 5: Provide Extensibility Guidelines
+* Change text: Expand section 5.2.10 (Extensibility) with: Extensions must adhere to:
+o Prefix custom keys with "x-" (e.g., "x-custom-fact").
+o Include an "extension_version" field for each custom section.
+o Document extensions in a linked "extension_docs_url" field.
+o Maintain backward compatibility by not removing existing keys in updates.
+* Why it helps: Standardizes extension practices, reducing fragmentation and improving long-term ecosystem coherence.
+* Compatibility impact: None (additive rules; existing extensions remain valid).
+* Abuse risk impact: Minimizes abuse by requiring documentation, deterring hidden malicious extensions.
+Tests
+1. Generate sample metadata JSON; validate against the new schema using a standard JSON Schema validator (e.g., ajv); expect no errors for compliant files and errors for invalid ones.
+2. Create test metadata with conflicting signatures (e.g., confidence 0.8 vs. 0.9); apply the procedure; verify selection of higher confidence and log output.
+3. Simulate a revocation notice; validate metadata before and after; expect section invalidation post-revocation.
+4. Set TTL to 1 second on test metadata; wait for expiration; confirm system marks as stale and restricts operations.
+5. Add a custom extension with "x-" prefix and version; parse metadata; verify presence of documentation URL and no key conflicts.
+Release Recommendation
+minor
+Final Scores:
+* Clarity: 85
+* Parser reliability: 65
+* Anti-hallucination strength: 80
+* Anti-spam resilience: 70
+

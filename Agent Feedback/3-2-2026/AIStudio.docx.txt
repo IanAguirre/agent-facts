@@ -1,0 +1,146 @@
+Findings
+Assumption: The current Agent-Facts Protocol defines a machine-readable facts document (JSON or JSON-LD), references via llms.txt, and a versioned spec page. Because {VERSION}, {DATE}, {SPEC_URL}, {FACTS_URL}, and {LLMS_URL} are placeholders and no normative text is provided, any reference to existing fields is inferred and may be unverifiable.
+1) No Mandatory Canonical Schema or $schema Declaration (Severity: Critical)
+If the protocol does not require a canonical JSON Schema URI and explicit $schema field, parsers cannot deterministically validate structure. This weakens interoperability and allows silent drift.
+2) Weak or Undefined Conflict Resolution Rules (Severity: High)
+If multiple Agent-Facts documents exist (e.g., subdomains, mirrors, staging vs production), lack of deterministic precedence rules creates ambiguity and hallucination risk.
+3) No Cryptographic Authenticity Requirement (Severity: High)
+Without a required integrity mechanism (e.g., content hash, signature, or DNS-bound verification), malicious actors can spoof Agent-Facts files.
+4) No Rate/Size Limits or Field Constraints (Severity: Medium)
+Absence of strict field length limits and maximum document size enables spam injection and prompt-stuffing attacks.
+5) Undefined Deprecation & Version Negotiation Policy (Severity: Medium)
+If backward compatibility behavior is not formally specified (e.g., required/optional fields per version), parsers cannot safely evolve.
+
+Proposed Edits
+Edit 1 - Mandatory JSON Schema Binding
+Change text (ready to paste)
+### 2.1 Schema Declaration (Normative)
+
+All Agent-Facts documents MUST:
+
+1. Be valid UTF-8 encoded JSON.
+2. Include a top-level "$schema" property referencing the canonical schema URI.
+3. Include a top-level "protocol_version" string matching the semantic version of this specification.
+
+Example:
+
+{
+  "$schema": "https://agentfacts.org/schema/1.1.0",
+  "protocol_version": "1.1.0",
+  ...
+}
+
+Documents missing "$schema" or "protocol_version" MUST be treated as non-compliant.
+Why it helps
+Enables deterministic validation, improves parser reliability, prevents silent format drift.
+Compatibility impact: Low (additive; old docs remain readable but non-compliant)
+Abuse risk impact: Reduces spoofing and malformed payload attacks.
+Objective acceptance test
+Given a document without $schema, validation MUST fail with error code AF001.
+
+Edit 2 - Deterministic Canonical Location & Precedence
+Change text
+### 3.0 Canonical Location & Precedence (Normative)
+
+The canonical Agent-Facts file MUST be hosted at:
+
+https://{domain}/.well-known/agent-facts.json
+
+If multiple Agent-Facts files are discovered:
+
+1. The .well-known location takes precedence over all others.
+2. HTTPS takes precedence over HTTP.
+3. The highest "protocol_version" compatible with the parser MUST be selected.
+4. Subdomain files MUST NOT override apex domain identity fields unless explicitly delegated via "delegation": true.
+
+Parsers MUST ignore non-canonical locations unless explicitly configured.
+Why it helps
+Eliminates ambiguity, reduces hallucinated data merging, ensures consistent identity resolution.
+Compatibility impact: Medium (may override legacy multi-file setups)
+Abuse risk impact: Strong reduction in spoofed subdomain overrides.
+Objective acceptance test
+If both /agent-facts.json and /.well-known/agent-facts.json exist, parser MUST select the .well-known file.
+
+Edit 3 - Integrity & Authenticity Requirement
+Change text
+### 4.0 Integrity Verification (Normative)
+
+Agent-Facts documents MUST include one of the following:
+
+A. "sha256" field containing the base64-encoded SHA-256 hash of the canonical file.
+OR
+B. "signature" field containing a detached JWS signature referencing a public key published at:
+   https://{domain}/.well-known/agent-facts-key.json
+
+Parsers MUST verify integrity before consuming the document.
+If verification fails, the document MUST be rejected.
+Why it helps
+Prevents spoofing, MITM tampering, and malicious mirror injection.
+Compatibility impact: Medium (requires publishers to add hash or signature)
+Abuse risk impact: Significant reduction in malicious takeover risk.
+Objective acceptance test
+If the file content hash does not match declared sha256, parser MUST reject with error AF003.
+
+Edit 4 - Strict Field and Size Constraints
+Change text
+### 5.0 Field Constraints (Normative)
+
+The Agent-Facts document MUST NOT exceed 64 KB uncompressed.
+
+Individual fields MUST comply with:
+
+- "name": <= 200 characters
+- "description": <= 1000 characters
+- "facts[]": max 100 entries
+- Each fact value <= 500 characters
+
+Fields exceeding limits MUST cause validation failure.
+HTML, Markdown, or executable code is NOT permitted in any field.
+Why it helps
+Prevents prompt stuffing, SEO spam, injection attacks.
+Compatibility impact: Low (additive validation)
+Abuse risk impact: Strong anti-spam resilience.
+Objective acceptance test
+A document of 70 KB MUST fail validation with error AF005.
+
+Edit 5 - Versioning & Deprecation Policy
+Change text
+### 6.0 Versioning and Compatibility (Normative)
+
+Semantic Versioning applies:
+
+MAJOR: Breaking structural changes
+MINOR: Backward-compatible additions
+PATCH: Clarifications or non-structural corrections
+
+Parsers MUST:
+- Accept same MAJOR versions.
+- Reject higher MAJOR versions.
+- Ignore unknown fields in MINOR versions.
+
+Deprecated fields MUST remain valid for at least one MINOR release cycle.
+Why it helps
+Prevents parser breakage, enables safe ecosystem growth.
+Compatibility impact: None (clarifies behavior)
+Abuse risk impact: Neutral but reduces accidental incompatibility exploits.
+Objective acceptance test
+Parser supporting 1.x MUST reject document with "protocol_version": "2.0.0".
+
+Tests
+1. Schema Enforcement Test - Missing $schema ? validation fails.
+2. Canonical Precedence Test - .well-known overrides root file.
+3. Integrity Test - Modified file hash ? parser rejection.
+4. Size Limit Test - 65 KB file ? validation error.
+5. Version Negotiation Test - Parser 1.x rejects 2.0.0.
+
+Final Scores (Current Protocol Estimated)
+Because the full spec text was not provided, scoring assumes absence of the above controls.
+* Clarity: 68/100
+* Parser reliability: 60/100
+* Anti-hallucination strength: 55/100
+* Anti-spam resilience: 50/100
+
+Release Recommendation
+Minor release (e.g., 1.1.0)
+All proposed changes are additive, deterministic, and mostly backward-compatible, but introduce normative enforcement. A MINOR version increment is appropriate.
+

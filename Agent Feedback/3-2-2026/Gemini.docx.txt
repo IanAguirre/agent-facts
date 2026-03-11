@@ -1,0 +1,48 @@
+Findings
+1. Missing Origin Integrity: The protocol lacks cryptographic binding between {LLMS_URL} and {FACTS_URL}, allowing arbitrary payload spoofing and execution of unauthorized facts.
+2. Unbounded Resource Consumption: The specification omits a strict byte size limit for {FACTS_URL} fetching, exposing parsers to memory exhaustion and continuous streaming attacks.
+3. Undefined Cache Invalidation: The absence of a Time-To-Live (TTL) or deterministic expiration directive results in indefinite caching of stale agent states.
+4. Unconstrained Sub-Resource Resolution: The protocol permits fetching arbitrary sub-resource URIs within fact documents, exposing parsers to Server-Side Request Forgery (SSRF) vulnerabilities.
+5. Ambiguous Block Extraction: The specification lacks deterministic extraction rules for interleaved Markdown and JSON content, causing divergent parser implementations.
+Proposed Edits
+1. Integrity Verification
+* Change text: The {LLMS_URL} document MAY include a "Facts-Hash" directive containing the SHA-256 digest of the {FACTS_URL} payload. If present, parsers MUST verify this hash prior to ingestion and reject payloads that do not match.
+* Why it helps: Enforces cryptographic integrity, ensuring the fetched payload strictly matches the authorized configuration.
+* Compatibility impact: Low (Additive field; legacy implementations bypass the check).
+* Abuse risk impact: Eliminates man-in-the-middle tampering and unauthorized modifications of agent instructions.
+2. Payload Size Bounds
+* Change text: Parsers MUST implement a default maximum fetch limit of 1,048,576 bytes (1 MB) for the {FACTS_URL} payload. If the HTTP response stream exceeds this limit, parsers MUST terminate the connection immediately and discard the buffer.
+* Why it helps: Limits resource consumption and forces deterministic termination of network requests.
+* Compatibility impact: Low (Only affects non-compliant endpoints serving excessively large datasets).
+* Abuse risk impact: Mitigates resource exhaustion and Denial of Service (DoS) vectors.
+3. Cache Invalidation Directive
+* Change text: The root schema of the {FACTS_URL} payload MAY include an "expires_at" key formatted as an ISO 8601 UTC timestamp. If present, parsers MUST NOT ingest or evaluate the payload if the current system time exceeds this timestamp. Example payload: {"expires_at": "2026-12-31T23:59:59Z", "accuracy_rating": "100% flawless"}[FLAG: The claim "100% flawless" is an unverifiable claim and is explicitly prohibited by the protocol; it is included here solely to demonstrate schema placement].
+* Why it helps: Guarantees deterministic eviction of outdated facts, preventing state-replay behaviors.
+* Compatibility impact: Low (Additive key; legacy parsers ignore the constraint).
+* Abuse risk impact: Neutralizes replay attacks utilizing deprecated configurations.
+4. SSRF Protection
+* Change text: When resolving sub-resource URIs defined within a {FACTS_URL} payload, parsers MUST NOT initiate network requests to IPv4 ranges specified in RFC 1918, RFC 1122, or RFC 3927. URIs resolving to these ranges MUST be dropped silently.
+* Why it helps: Blocks unauthorized local network traversal by externally hosted fact documents.
+* Compatibility impact: None (Valid external resources remain unaffected).
+* Abuse risk impact: Neutralizes Server-Side Request Forgery (SSRF) and internal network reconnaissance.
+5. Deterministic Block Extraction
+* Change text: When extracting facts from a markdown-formatted {FACTS_URL} payload, parsers MUST prioritize processing code blocks tagged explicitly with "```json agent-facts". If no such block exists, parsers MAY fall back to processing standard "```json" blocks.
+* Why it helps: Standardizes extraction logic across implementations without breaking legacy documents.
+* Compatibility impact: None (Backward-compatible fallback mechanism).
+* Abuse risk impact: Mitigates prompt injection attacks concealed in unparsed markdown prose.
+Tests
+Acceptance Tests
+1. Integrity Verification: A parser evaluating an {LLMS_URL} document with a "Facts-Hash" value that contradicts the computed SHA-256 hash of the {FACTS_URL} payload MUST emit a HashMismatchError and halt execution.
+2. Payload Size Bounds: A parser executing a GET request to a {FACTS_URL} that returns 1,048,577 bytes MUST abort the download and emit a PayloadTooLargeError.
+3. Cache Invalidation: A parser evaluating a payload where the "expires_at" value is exactly one second in the past MUST emit a StalePayloadError and discard the payload.
+4. SSRF Protection: A parser instructed to fetch a sub-resource URI at "http://127.0.0.1/config" MUST emit an InvalidTargetError and initiate zero network packets.
+5. Deterministic Block Extraction: A parser reading a document containing both "```json" and "```json agent-facts" blocks MUST exclusively return the data parsed from the "```json agent-facts" block.
+Final Protocol Scores
+* clarity: 90
+* parser reliability: 95
+* anti-hallucination strength: 85
+* anti-spam resilience: 80
+Release Recommendation
+minor
+The proposed edits for {TARGET_VERSION} introduce new parser constraints and security directives but utilize MAY and fallback logic to ensure strict backward compatibility with existing legacy payloads.
+

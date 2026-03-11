@@ -1,0 +1,41 @@
+Findings
+1. Provenance & Authentication Deficit (Severity: Critical): The protocol lacks a cryptographic mechanism to verify that the entity publishing the facts is the authoritative domain owner. This leaves the protocol highly vulnerable to spoofing, scraping, and injection of poisoned data by third-party aggregators.
+2. State Desynchronization (Severity: Critical): Maintaining a standalone facts URL or llms.txt file alongside standard user-facing DOM content creates a split-brain architecture. The protocol does not define synchronization enforcement, guaranteeing that the machine-readable facts will eventually contradict the user-facing site.
+3. Undefined Conflict Resolution (Severity: High): The specification fails to define a hierarchy of truth. When an LLM crawler encounters contradictory data between agent-facts, embedded Schema.org JSON-LD, and main HTML content, the parser's fallback behavior is undefined, leading to unpredictable indexing.
+4. Discovery Ambiguity (Severity: Medium): Relying on arbitrary URLs ({FACTS_URL}) without a standardized registry protocol (e.g., an RFC 8615 /.well-known/ URI or a dedicated robots.txt directive) forces crawlers to rely on heuristic discovery, increasing latency and failure rates.
+5. Schema Rigidity & Validation (Severity: Medium): If the protocol relies on flat text or standard Markdown (as typical with llms.txt), it fails to provide a deterministic, machine-verifiable schema. Extracting strict key-value facts from conversational text relies on the crawler's NLP capabilities, introducing unacceptable error margins for factual data.
+
+Proposed Edits
+Edit 1: Implement Standardized Discovery Directive
+* Change text: "Compliant domains MUST declare the location of their Agent-Facts payload using the Agent-Facts: directive within their robots.txt file, or host the payload strictly at /.well-known/agent-facts.json."
+* Why it helps: Eliminates crawler guesswork and establishes a universal, deterministic entry point for all AI agents.
+* Compatibility impact: Low. Additive change.
+* Abuse risk impact: Low.
+* Objective acceptance test: A standard HTTP GET request to /robots.txt successfully parses an Agent-Facts: URI, and a subsequent GET to that URI returns a 200 OK status.
+Edit 2: Mandate Cryptographic Provenance (JWS)
+* Change text: "All Agent-Facts payloads MUST be signed using JSON Web Signatures (JWS) mapping to a public key hosted on the authoritative domain's DNS records via a TXT entry."
+* Why it helps: Cryptographically guarantees that the facts were published by the domain owner, instantly neutralizing third-party data poisoning or spoofed endpoints.
+* Compatibility impact: High. Requires key management and payload restructuring.
+* Abuse risk impact: Massive reduction in data poisoning and domain impersonation.
+* Objective acceptance test: The parser automatically rejects and drops any payload where the JWS signature does not match the public key found in the domain's _agentfacts DNS TXT record.
+Edit 3: Define Strict Conflict Resolution Hierarchy
+* Change text: "In the event of a factual conflict between the Agent-Facts payload, embedded JSON-LD, and DOM text, parsers MUST prioritize the Agent-Facts payload IF AND ONLY IF the payload has a last-modified timestamp newer than the DOM's article:modified_time. Otherwise, the payload is marked stale and discarded."
+* Why it helps: Provides a deterministic rule for AI engines to resolve conflicting data, preventing hallucination cascades.
+* Compatibility impact: Medium. Requires timestamp metadata in the payload.
+* Abuse risk impact: Medium reduction in stale data propagation.
+* Objective acceptance test: Given a mock DOM stating "Price: $10" (updated today) and an Agent-Facts payload stating "Price: $15" (updated yesterday), the parser correctly outputs "$10" and logs a desync warning.
+
+Tests
+To ensure parser reliability and protocol adherence, the following baseline test suite must be passed by any implementing agent:
+1. Discovery Test: Parser successfully locates the protocol via robots.txt without crawling the root index.
+2. Authentication Test: Parser strictly drops payloads with missing, malformed, or invalid cryptographic signatures.
+3. Schema Validation Test: Parser drops payloads containing undocumented schema keys or invalid data types (e.g., parsing a string where a boolean is required).
+4. Desync Fallback Test: Parser executes the defined conflict resolution hierarchy when fed deliberately contradicting DOM and Agent-Facts data.
+5. Injection Test: Parser neutralizes markdown/HTML prompt injection attempts hidden within text-value fields in the facts payload.
+
+Protocol Scoring
+* Clarity: 60/100 (Suffers from ambiguous entry points and undefined crawler rules).
+* Parser Reliability: 45/100 (If utilizing flat text/llms.txt, deterministic extraction is severely compromised).
+* Anti-Hallucination Strength: 50/100 (Siloed data naturally drifts from main site reality, directly feeding outdated data to models).
+* Anti-Spam Resilience: 20/100 (Without cryptographic signatures, the protocol is highly vulnerable to spoofing).
+
