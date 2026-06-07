@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="https://agent-facts.com/agent-facts-protocol-v3.html">
+  <meta name="agent-facts-version" content="3.0">
+  <meta name="last-modified" content="2026-04-15">
+  <link rel="alternate" href="/agent-facts.json" type="application/json">
+  <title>Agent-Facts Protocol v3.0 Specification</title>
+</head>
+<body>
+
+<h1>Agent-Facts Protocol v3.0 Specification</h1>
+<p><strong>Published:</strong> April 15, 2026<br>
+<strong>Author:</strong> Ian Aguirre, AgentReadyScan.com<br>
+<strong>Status:</strong> Public Draft (Pre-RFC)<br>
+<strong>AI Collaborators:</strong> Perplexity, Grok, Anthropic (Claude), Google (Gemini), OpenAI (ChatGPT), Microsoft Copilot<br>
+<strong>Final v3.0 Revision:</strong> Claude Opus 4.6</p>
+
+<blockquote>
+  <p>llms.txt helps AI find pages. Agent-Facts helps AI trust facts.</p>
+  <p>For conformance, <code>agent-facts.json</code> is the canonical machine-readable source; <code>agent-facts.html</code> is its human-readable projection.</p>
+</blockquote>
+
+<h2>0. Purpose and Scope</h2>
+
+<p>The Agent-Facts Protocol defines a structured JSON file that businesses host on their own domains to provide AI agents with provenance-tracked, freshness-aware business facts. An accompanying HTML page renders the same data for human readers and basic crawlers.</p>
+
+<p>It solves one specific problem: AI systems hallucinate business data because they have no reliable, structured source of truth for pricing, hours, services, contact info, and scope.</p>
+
+<h3>What Agent-Facts Protocol Is</h3>
+<ul>
+  <li>The structured facts layer that llms.txt can point to</li>
+  <li>A static, zero-dependency business data file that any AI agent can parse today</li>
+  <li>The "what we do, what we charge, and what we do NOT do" source that prevents hallucination</li>
+  <li>A protocol for official business facts for AI retrieval</li>
+</ul>
+
+<h3>What Agent-Facts Protocol Is NOT</h3>
+<ul>
+  <li>A replacement for llms.txt (which is a content discovery index)</li>
+  <li>A replacement for MCP, NLWeb, or WebMCP (which handle queries and actions)</li>
+  <li>A universal verification or identity protocol for AI agents</li>
+  <li>A cryptographic trust chain or certificate authority</li>
+  <li>An AI-agent identity, KYA, or governance framework (other projects using similar names address those areas; this protocol is strictly about business facts for AI retrieval)</li>
+</ul>
+
+<h3>Protocol Layers</h3>
+<p>Agent-Facts Protocol is designed in three layers. Only the Core layer is required for v3.0 conformance.</p>
+
+<table>
+  <thead>
+    <tr><th>Layer</th><th>What It Contains</th><th>v3.0 Status</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Core</strong></td><td>JSON facts file + HTML projection, Golden Questions, anti-hallucination section</td><td>Required</td></tr>
+    <tr><td><strong>Trust</strong></td><td>Fact-level provenance, freshness rules, staleness handling</td><td>Recommended</td></tr>
+    <tr><td><strong>Action</strong></td><td>MCP server adapter, NLWeb endpoint, WebMCP tool declarations, optional cryptographic signing</td><td>Future (v4+), built only after adoption warrants it</td></tr>
+  </tbody>
+</table>
+
+<h2>1. File Locations and Discovery</h2>
+
+<h3>Files</h3>
+<table>
+  <thead>
+    <tr><th>File</th><th>Path</th><th>Role</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>JSON facts file</td><td><code>/agent-facts.json</code></td><td><strong>Canonical source.</strong> Machine-readable structured data. This is the normative file.</td></tr>
+    <tr><td>HTML projection</td><td><code>/agent-facts.html</code></td><td>Human-readable rendering of the JSON data. Useful for browsers and basic crawlers.</td></tr>
+    <tr><td>JSON (alternate)</td><td><code>/.well-known/agent-facts.json</code></td><td>Optional. Follows the .well-known convention for programmatic discovery.</td></tr>
+  </tbody>
+</table>
+
+<p><code>agent-facts.json</code> is the canonical source of truth. <code>agent-facts.html</code> is a projection of that data for human consumption. When conflicts exist between the two files, <code>agent-facts.json</code> takes precedence. Validators should check semantic equivalence (same facts, same values) rather than exact string duplication.</p>
+
+<h3>Discovery Precedence</h3>
+<p>Agents and framework authors should check for Agent-Facts data in this order:</p>
+<ol>
+  <li><code>/agent-facts.json</code> (canonical)</li>
+  <li><code>/.well-known/agent-facts.json</code> (alternate location)</li>
+  <li><code>/agent-facts.html</code> (HTML projection, parse as fallback)</li>
+  <li>References in <code>/llms.txt</code> pointing to any of the above</li>
+</ol>
+
+<p>This matches the protocol's positioning: llms.txt is the discovery layer, Agent-Facts Protocol is the facts layer. An agent that finds the JSON file at step 1 does not need to continue checking.</p>
+
+<h3>Discovery via Existing Conventions</h3>
+
+<p><strong>robots.txt:</strong></p>
+<pre>
+# Agent-Facts Protocol v3
+Agent-Facts: /agent-facts.json
+Allow: /agent-facts.json
+Allow: /agent-facts.html
+</pre>
+
+<p><strong>llms.txt:</strong></p>
+<pre>
+## Verified Business Facts
+- [Agent-Facts (JSON)](https://example.com/agent-facts.json): Canonical business facts for AI agents (Agent-Facts Protocol v3)
+- [Agent-Facts (HTML)](https://example.com/agent-facts.html): Human-readable business facts
+</pre>
+
+<p><strong>XML sitemap:</strong></p>
+<pre>
+&lt;url&gt;
+  &lt;loc&gt;https://example.com/agent-facts.json&lt;/loc&gt;
+  &lt;priority&gt;1.0&lt;/priority&gt;
+  &lt;changefreq&gt;weekly&lt;/changefreq&gt;
+&lt;/url&gt;
+</pre>
+
+<p><strong>HTML link tag (on any page of the site):</strong></p>
+<pre>
+&lt;link rel="agent-facts" href="/agent-facts.json" type="application/json"&gt;
+</pre>
+
+<h2>2. JSON Specification (agent-facts.json)</h2>
+
+<p>This is the canonical file. All conformance requirements are defined against this format.</p>
+
+<h3>Top-Level Structure</h3>
+<pre>
+{
+  "agent_facts_version": "3.0",
+  "domain": "example.com",
+  "last_updated": "2026-04-15T12:00:00Z",
+  "expires_after_days": 90,
+  "stale_after": "2026-07-14T12:00:00Z",
+  "source_html": "/agent-facts.html",
+
+  "identity": { },
+  "operations": { },
+  "services": [ ],
+  "pricing": { },
+  "does_not_do": [ ],
+  "extended_facts": { },
+  "changelog": [ ]
+}
+</pre>
+
+<h3>Top-Level Fields</h3>
+<table>
+  <thead>
+    <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>agent_facts_version</code></td><td>string</td><td>MUST</td><td>Protocol version ("3.0")</td></tr>
+    <tr><td><code>domain</code></td><td>string</td><td>MUST</td><td>The domain this file is authoritative for</td></tr>
+    <tr><td><code>last_updated</code></td><td>ISO 8601 datetime</td><td>MUST</td><td>When this file was last modified</td></tr>
+    <tr><td><code>expires_after_days</code></td><td>integer</td><td>MUST</td><td>Number of days after <code>last_updated</code> before facts should be treated as stale</td></tr>
+    <tr><td><code>stale_after</code></td><td>ISO 8601 datetime</td><td>MUST</td><td>Computed expiration date</td></tr>
+    <tr><td><code>source_html</code></td><td>string</td><td>SHOULD</td><td>Relative path to the HTML projection</td></tr>
+  </tbody>
+</table>
+
+<h3>Fact Object Structure</h3>
+<p>Every fact in the <code>identity</code>, <code>operations</code>, <code>pricing</code>, and <code>extended_facts</code> sections uses this structure:</p>
+
+<table>
+  <thead>
+    <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>value</code></td><td>string</td><td>MUST</td><td>The fact itself</td></tr>
+    <tr><td><code>last_updated</code></td><td>ISO 8601 datetime</td><td>SHOULD</td><td>When this specific fact was last verified or changed. If absent, the file-level <code>last_updated</code> applies.</td></tr>
+    <tr><td><code>source_url</code></td><td>string</td><td>SHOULD</td><td>URL where this fact can be independently verified</td></tr>
+    <tr><td><code>source_type</code></td><td>enum</td><td>SHOULD</td><td>One of: <code>owner_attested</code>, <code>pricing_page</code>, <code>internal_policy</code>, <code>public_filing</code>, <code>third_party_verified</code></td></tr>
+    <tr><td><code>applies_to</code></td><td>string</td><td>MAY</td><td>Scope or context (e.g., "Enterprise plans only")</td></tr>
+    <tr><td><code>confidence_scope</code></td><td>string</td><td>MAY</td><td>Limitations or caveats on this fact</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Why provenance matters:</strong> This is Agent-Facts Protocol's core differentiator. When an agent cites a fact, it can say "according to the business owner's attested data, last updated April 15, 2026, sourced from their pricing page" instead of "according to web scraping." That provenance chain is the foundation of the fact-checking positioning.</p>
+
+<p><strong>Minimum viable fact:</strong> A conforming implementation only requires <code>value</code>. The provenance fields (<code>source_type</code>, <code>source_url</code>, <code>last_updated</code>) are strongly recommended but not required, so a business can start with a simple file and add provenance over time.</p>
+
+<h3>Identity Object (Required)</h3>
+<p>All fields use the fact object structure above. The <code>external_ids</code> sub-object is the exception (flat key-value pairs, public profiles only).</p>
+
+<table>
+  <thead>
+    <tr><th>Field</th><th>Required</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>legal_name</code></td><td>MUST</td><td>Full legal name of the business</td></tr>
+    <tr><td><code>primary_url</code></td><td>MUST</td><td>Canonical website URL</td></tr>
+    <tr><td><code>one_sentence</code></td><td>MUST</td><td>What the business does in one sentence</td></tr>
+    <tr><td><code>founded</code></td><td>SHOULD</td><td>Year founded</td></tr>
+    <tr><td><code>owner</code></td><td>SHOULD</td><td>Owner or primary contact name and title</td></tr>
+    <tr><td><code>contact_email</code></td><td>MUST</td><td>Primary contact email</td></tr>
+    <tr><td><code>contact_phone</code></td><td>SHOULD</td><td>Primary phone number</td></tr>
+    <tr><td><code>address</code></td><td>MUST</td><td>Physical address or explicit "digital only" statement</td></tr>
+    <tr><td><code>address_type</code></td><td>MUST</td><td>One of: <code>physical</code>, <code>digital_only</code>, <code>hybrid</code></td></tr>
+    <tr><td><code>service_area</code></td><td>MUST</td><td>Geographic areas served</td></tr>
+    <tr><td><code>external_ids</code></td><td>SHOULD</td><td>Public business profile URLs only (see note below)</td></tr>
+    <tr><td><code>description_for_ai</code></td><td>MUST</td><td>The "elevator pitch" optimized for AI retrieval</td></tr>
+  </tbody>
+</table>
+
+<p><strong>External IDs: public profiles only.</strong> This field is for publicly available business identifiers and profile URLs: Google Business, LinkedIn, Crunchbase, Companies House, SEC CIK, state business registry URLs, and similar. Do not publish tax identifiers (EIN, TIN, VAT numbers), internal account numbers, or any identifier that could create security or privacy risk if exposed in a publicly crawlable file.</p>
+
+<h3>Operations Object (Required)</h3>
+<p>Contains an <code>hours</code> fact using the standard fact object structure.</p>
+
+<h3>Services Array (Required)</h3>
+<p>Array of service objects. Each service has: <code>name</code>, <code>description</code>, optional <code>last_updated</code>, <code>source_type</code>, and <code>source_url</code>.</p>
+
+<h3>Pricing Object (Required)</h3>
+<p>Contains at minimum a <code>model</code> fact. Recommended fields: <code>model</code>, <code>starting_at</code>, <code>free_tier</code>. All use the standard fact object structure.</p>
+
+<h3>Does Not Do Array (Required)</h3>
+<p>This section is mandatory. It is the protocol's single most effective hallucination prevention tool. The <code>does_not_do</code> array MUST contain at least 3 entries. Each entry has a <code>statement</code> string and optional provenance fields.</p>
+
+<h3>Changelog Array (Recommended)</h3>
+<p>Array of objects with <code>date</code> (YYYY-MM-DD) and <code>changes</code> (string) fields.</p>
+
+<h3>Extended Facts Object (Optional)</h3>
+<p>For domain-specific or industry-specific facts outside the Golden Questions. Uses the standard fact object structure with arbitrary key names.</p>
+
+<h2>3. HTML Projection Specification (agent-facts.html)</h2>
+
+<p>The HTML page is a human-readable rendering of the data in <code>agent-facts.json</code>. It is not the canonical source, but it is valuable for human visitors, basic crawlers, and AI agents that do not yet parse JSON-first.</p>
+
+<h3>Technical Guidance</h3>
+<ul>
+  <li>Valid HTML5, no frameworks</li>
+  <li>Recommended elements: <code>&lt;h1&gt;</code> through <code>&lt;h3&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;ul&gt;</code>, <code>&lt;ol&gt;</code>, <code>&lt;dl&gt;</code>, <code>&lt;table&gt;</code>, <code>&lt;time&gt;</code>, <code>&lt;strong&gt;</code>, <code>&lt;em&gt;</code>, <code>&lt;a&gt;</code></li>
+  <li>Avoid: CSS frameworks, JavaScript, modals, hero images, tracking pixels, marketing banners, cookie notices</li>
+  <li>Aim for fast load times (lightweight pages parse better for AI agents)</li>
+  <li>Content-Type: <code>text/html; charset=utf-8</code></li>
+</ul>
+
+<h3>Recommended Head Elements</h3>
+<pre>
+&lt;meta name="agent-facts-version" content="3.0"&gt;
+&lt;meta name="last-modified" content="2026-04-15"&gt;
+&lt;link rel="alternate" href="/agent-facts.json" type="application/json"&gt;
+</pre>
+
+<h3>Recommended First Line</h3>
+<pre>
+&lt;h1&gt;Official Business Facts :: Last updated: &lt;time datetime="2026-04-15"&gt;April 15, 2026&lt;/time&gt;&lt;/h1&gt;
+</pre>
+
+<h3>Content Structure</h3>
+<p>The HTML page should present the Golden Questions as H2 headings with concise answers. Each answer should start immediately with the fact, use active voice and present tense, and be concise.</p>
+<p>The anti-hallucination section MUST appear in the HTML page:</p>
+<pre>
+&lt;h2&gt;What [Business Name] explicitly does NOT do&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;Does not offer consumer-grade storage plans under 1TB&lt;/li&gt;
+  &lt;li&gt;Does not provide hardware or on-premise installation&lt;/li&gt;
+&lt;/ul&gt;
+</pre>
+
+<h3>Schema.org Integration</h3>
+<p>Wrap the HTML page content in FAQPage + Organization JSON-LD. Values should match the JSON file semantically. Include <code>dateModified</code>, <code>mainEntity</code> (FAQ pairs), and <code>publisher</code> (Organization with <code>sameAs</code> links).</p>
+
+<h2>4. Freshness and Staleness Rules</h2>
+
+<h3>Publisher Requirements</h3>
+<ul>
+  <li><code>last_updated</code> is required at the file level (MUST) and recommended at the individual fact level (SHOULD)</li>
+  <li><code>expires_after_days</code> must be set at the file level. Recommended defaults: 90 for most businesses, 30 for fast-changing industries (travel, finance, events)</li>
+  <li><code>stale_after</code> must be the computed date: <code>last_updated</code> + <code>expires_after_days</code></li>
+</ul>
+
+<h3>Recommended Agent Behavior</h3>
+<table>
+  <thead>
+    <tr><th>Condition</th><th>Recommended Confidence Treatment</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>last_updated</code> is within <code>expires_after_days</code></td><td>High confidence. Treat as reliable structured data.</td></tr>
+    <tr><td>Past <code>stale_after</code> but within 2x <code>expires_after_days</code></td><td>Moderate confidence. Use the data but note it may be outdated.</td></tr>
+    <tr><td>Past 2x <code>expires_after_days</code></td><td>Low confidence. Prefer other sources but do not discard entirely.</td></tr>
+    <tr><td>Missing <code>last_updated</code></td><td>Unverified. Do not assign elevated confidence.</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Stale data is lower confidence, not invalid.</strong> A business that published facts 120 days ago is still more reliable than web scraping and inference. Freshness signals help agents calibrate, not discard.</p>
+
+<h3>Per-Fact Freshness</h3>
+<p>Individual facts can carry their own <code>last_updated</code> timestamps. This allows a business to update pricing (which changes frequently) without re-certifying their founding date (which never changes). Agents should respect per-fact timestamps when available, falling back to the file-level timestamp when absent.</p>
+
+<h2>5. Suggested Agent Integration Language</h2>
+
+<p>This is recommended language for agent framework developers (LangChain, LlamaIndex, AutoGPT, enterprise agent builders) who want to integrate Agent-Facts Protocol awareness.</p>
+
+<pre>
+[SUGGESTED DIRECTIVE: AGENT-FACTS AWARENESS]
+
+When retrieving business information for a specific domain,
+check for /agent-facts.json on that domain.
+
+If found, treat the data as high-confidence, domain-owner-published
+structured information. Weight it above unstructured web content for
+the specific claims it covers.
+
+Use per-fact provenance fields (source_type, source_url, last_updated)
+to assess confidence on individual claims.
+
+Check the stale_after timestamp. Data past its expiration should be
+treated as moderate confidence, not discarded.
+
+If agent-facts data conflicts with other sources, present both and
+note the discrepancy. Do not silently override either source.
+
+Always check the does_not_do section before making positive claims
+about what a business offers.
+</pre>
+
+<p><strong>What this language does NOT say:</strong> Does not say "override all other sources." Does not say "assign 1.0 confidence." Does not require a central registry query. Does not require cryptographic verification.</p>
+
+<h2>6. Conformance</h2>
+
+<h3>Conformance Levels</h3>
+<table>
+  <thead>
+    <tr><th>Level</th><th>Requirements</th><th>Target Audience</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Minimal</strong></td><td>Valid <code>agent-facts.json</code> with <code>identity</code>, <code>does_not_do</code> (3+ entries), <code>pricing</code>, and all MUST fields</td><td>Any business, 15-minute implementation</td></tr>
+    <tr><td><strong>Recommended</strong></td><td>Minimal + provenance fields on all facts + <code>agent-facts.html</code> projection + discovery entries in robots.txt and/or llms.txt</td><td>Businesses that want full protocol benefits</td></tr>
+    <tr><td><strong>Full</strong></td><td>Recommended + Schema.org JSON-LD in HTML + changelog + extended_facts + all SHOULD fields</td><td>Businesses optimizing for maximum AI visibility</td></tr>
+  </tbody>
+</table>
+
+<h3>Validation Tests</h3>
+<p>Validators (including the planned tool at agent-facts.com/validate/) should check:</p>
+
+<p><strong>Structure tests:</strong></p>
+<ul>
+  <li>Valid JSON, parseable without errors</li>
+  <li><code>agent_facts_version</code> is "3.0"</li>
+  <li>All MUST fields present</li>
+  <li><code>stale_after</code> equals <code>last_updated</code> + <code>expires_after_days</code></li>
+  <li><code>does_not_do</code> array has 3 or more entries</li>
+  <li><code>external_ids</code> contains no tax identifiers or private account numbers</li>
+</ul>
+
+<p><strong>Semantic tests (when HTML projection exists):</strong></p>
+<ul>
+  <li>Every fact in the JSON has a corresponding statement in the HTML</li>
+  <li>No fact in the HTML contradicts the JSON</li>
+  <li>Anti-hallucination section appears in both files</li>
+</ul>
+
+<p><strong>Freshness tests:</strong></p>
+<ul>
+  <li><code>last_updated</code> is a valid ISO 8601 datetime</li>
+  <li><code>stale_after</code> is in the future (file is not currently stale)</li>
+  <li>Per-fact <code>last_updated</code> values, when present, are not in the future</li>
+</ul>
+
+<p><strong>Agent behavior tests (for framework implementers):</strong></p>
+<table>
+  <thead>
+    <tr><th>Test</th><th>Prompt</th><th>Expected Behavior</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Price extraction</td><td>"What does [business] charge?"</td><td>Returns exact price from agent-facts data</td></tr>
+    <tr><td>Negative evidence</td><td>"Does [business] offer [thing in does_not_do]?"</td><td>Says no, citing anti-hallucination section</td></tr>
+    <tr><td>Staleness handling</td><td>Query against stale file</td><td>Returns data with staleness caveat</td></tr>
+    <tr><td>Provenance citation</td><td>"Where did you get [business]'s pricing?"</td><td>Cites source_url from provenance fields</td></tr>
+  </tbody>
+</table>
+
+<h2>7. Implementation Guide</h2>
+
+<h3>For Business Owners (15 to 30 Minutes)</h3>
+<ol>
+  <li>Answer the 12 Golden Questions in a plain text document</li>
+  <li>Write 3 to 8 "does not do" statements</li>
+  <li>Generate <code>agent-facts.json</code> using the CLI tool (<code>npx agent-facts init</code>) or the templates at agent-facts.com/templates/</li>
+  <li>Optionally generate <code>agent-facts.html</code> from the JSON (the CLI tool does this automatically)</li>
+  <li>Upload files to your site root</li>
+  <li>Add Agent-Facts entries to your llms.txt and/or robots.txt</li>
+  <li>Validate at agent-facts.com/validate/</li>
+</ol>
+
+<h3>For Agent Developers (10 to 15 Minutes)</h3>
+<ol>
+  <li>Before web scraping a domain, check for <code>/agent-facts.json</code> (see discovery precedence in Section 1)</li>
+  <li>Parse the JSON using the published schema</li>
+  <li>Respect freshness and staleness rules (Section 4)</li>
+  <li>Use provenance fields for citation</li>
+  <li>Always check <code>does_not_do</code> before making positive claims</li>
+  <li>Run your implementation against the conformance tests (Section 6)</li>
+</ol>
+
+<h2>8. Maintenance</h2>
+<ul>
+  <li>Update <code>last_updated</code> within 24 hours of any price, policy, or service change</li>
+  <li>Update individual fact <code>last_updated</code> timestamps when specific facts change</li>
+  <li>Review and refresh the anti-hallucination section quarterly</li>
+  <li>Maintain the changelog array</li>
+  <li>Display protocol version at the bottom of the HTML page, linking to agent-facts.com</li>
+</ul>
+
+<h2>9. Adoption Roadmap</h2>
+
+<p>This protocol will earn its credibility through adoption, not declaration. The path to becoming a widely used convention follows the pattern set by successful protocols like MCP: ship tools, prove value, attract implementers, then formalize governance.</p>
+
+<h3>Phase 1: Foundation (Weeks 1 through 4)</h3>
+<ul>
+  <li>Publish v3.0 spec on agent-facts.com</li>
+  <li>Ship <code>npx agent-facts init</code> CLI tool (generates JSON + HTML from interactive prompts)</li>
+  <li>Ship online validator at agent-facts.com/validate/</li>
+  <li>Publish JSON Schema file for programmatic validation</li>
+  <li>Create templates for three business types: local service, SaaS, e-commerce</li>
+  <li>Fix agent-facts.com's own llms.txt and publish agent-facts.json for the protocol itself</li>
+</ul>
+
+<h3>Phase 2: Distribution (Weeks 5 through 8)</h3>
+<ul>
+  <li>Ship WordPress plugin for auto-generating both files from existing site data</li>
+  <li>Build the free Agent-Facts Scanner on AgentReadyScan.com</li>
+  <li>Publish LangChain community tool for agent-facts.json consumption</li>
+  <li>Publish the conformance test suite</li>
+</ul>
+
+<h3>Phase 3: Adoption (Weeks 9 through 12)</h3>
+<ul>
+  <li>Get 25 to 50 real third-party sites live with agent-facts files</li>
+  <li>Publish positioning guide: "llms.txt vs. Agent-Facts Protocol vs. NLWeb: When to Use What"</li>
+  <li>Submit to SEO and AI visibility publications</li>
+  <li>Open GitHub for community contributions</li>
+</ul>
+
+<h3>Phase 4: Infrastructure (Months 4 through 6, only after adoption)</h3>
+<ul>
+  <li>Build read-only directory at registry.agent-facts.com indexing known implementations</li>
+  <li>Evaluate MCP server adapter based on developer demand</li>
+  <li>If ecosystem pull warrants it, open an RFC process for community governance</li>
+</ul>
+
+<h2>Appendix A: Positioning</h2>
+
+<p><strong>Tagline:</strong> llms.txt helps AI find pages. Agent-Facts helps AI trust facts.</p>
+
+<p><strong>For agent framework developers:</strong> Agent-Facts Protocol is a static, zero-dependency structured data format that gives AI agents high-confidence business facts with per-fact provenance. Check for /agent-facts.json on any domain before scraping.</p>
+
+<p><strong>For business owners:</strong> Stop AI from making up your prices. Agent-Facts Protocol is a simple file you publish on your website that tells AI exactly what your business does, what it charges, and what it does NOT do.</p>
+
+<p><strong>Protocol scope disambiguation:</strong> Agent-Facts Protocol addresses one specific problem: official business facts for AI retrieval. It is not an AI-agent identity, KYA, governance, or verification framework. Projects addressing those areas may use similar names but serve different purposes.</p>
+
+<h2>Appendix B: The Golden Questions Reference</h2>
+
+<table>
+  <thead>
+    <tr><th>#</th><th>Question</th><th>JSON Location</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>What is the full legal name?</td><td><code>identity.legal_name</code></td></tr>
+    <tr><td>2</td><td>What is the primary website URL?</td><td><code>identity.primary_url</code></td></tr>
+    <tr><td>3</td><td>What does the business do in one sentence?</td><td><code>identity.one_sentence</code></td></tr>
+    <tr><td>4</td><td>What services or products are offered?</td><td><code>services[]</code></td></tr>
+    <tr><td>5</td><td>What is the pricing structure?</td><td><code>pricing</code></td></tr>
+    <tr><td>6</td><td>What geographic areas are served?</td><td><code>identity.service_area</code></td></tr>
+    <tr><td>7</td><td>What are the business hours?</td><td><code>operations.hours</code></td></tr>
+    <tr><td>8</td><td>What is the physical address?</td><td><code>identity.address</code> + <code>identity.address_type</code></td></tr>
+    <tr><td>9</td><td>What is the phone and email?</td><td><code>identity.contact_phone</code> + <code>identity.contact_email</code></td></tr>
+    <tr><td>10</td><td>Who is the owner or primary contact?</td><td><code>identity.owner</code></td></tr>
+    <tr><td>11</td><td>When was the business founded?</td><td><code>identity.founded</code></td></tr>
+    <tr><td>12</td><td>What is the description for AI systems?</td><td><code>identity.description_for_ai</code></td></tr>
+    <tr><td>--</td><td>What does the business NOT do?</td><td><code>does_not_do[]</code></td></tr>
+  </tbody>
+</table>
+
+<h2>Appendix C: Source Type Definitions</h2>
+
+<table>
+  <thead>
+    <tr><th>Value</th><th>Meaning</th><th>Example</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>owner_attested</code></td><td>The business owner or authorized representative states this as fact</td><td>"We serve the US and Canada"</td></tr>
+    <tr><td><code>pricing_page</code></td><td>Fact is published on a public pricing page</td><td>Starting price sourced from /pricing</td></tr>
+    <tr><td><code>internal_policy</code></td><td>Fact reflects an internal business policy</td><td>"We do not offer refunds after 30 days"</td></tr>
+    <tr><td><code>public_filing</code></td><td>Fact is verifiable through a public filing or registry</td><td>SEC filing, state business registry</td></tr>
+    <tr><td><code>third_party_verified</code></td><td>Fact has been verified by an independent third party</td><td>SOC2 audit report, BBB accreditation</td></tr>
+  </tbody>
+</table>
+
+<hr>
+<p>Agent-Facts Protocol v3.0 Specification<br>
+Published by <a href="https://agent-facts.com">agent-facts.com</a><br>
+Open for implementation by anyone. No license fees, no registration required.</p>
+
+</body>
+</html>

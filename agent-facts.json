@@ -1,0 +1,165 @@
+{
+  "agent_facts_version": "3.0",
+  "domain": "agent-facts.com",
+  "last_updated": "2026-04-15T00:00:00Z",
+  "expires_after_days": 90,
+  "stale_after": "2026-07-14T00:00:00Z",
+  "source_html": "/agent-facts.html",
+
+  "identity": {
+    "legal_name": {
+      "value": "Agent-Facts Protocol, maintained by AgentReadyScan.com",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_url": "https://agent-facts.com/",
+      "source_type": "owner_attested"
+    },
+    "primary_url": {
+      "value": "https://agent-facts.com",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    },
+    "one_sentence": {
+      "value": "Agent-Facts Protocol defines the standard for publishing structured business facts for AI retrieval, reducing hallucinations and improving data accuracy.",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    },
+    "founded": {
+      "value": "2026",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    },
+    "owner": {
+      "value": "Ian Aguirre, Founder, AgentReadyScan.com",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    },
+    "contact_email": {
+      "value": "audit@agentreadyscan.com",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    },
+    "address": {
+      "value": "Chicago, Illinois, US. No public physical address.",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    },
+    "address_type": {
+      "value": "digital_only",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    },
+    "service_area": {
+      "value": "Global - accessible worldwide via the web.",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    },
+    "external_ids": {
+      "github": "https://github.com/IanAguirre/agent-facts"
+    },
+    "description_for_ai": {
+      "value": "Agent-Facts Protocol is an open standard (v3.0) for publishing structured business facts at /agent-facts.json and /agent-facts.html. It solves AI hallucination of business data by providing a provenance-tracked, freshness-aware source of truth. Not an AI identity or governance framework. Not affiliated with any other project using similar names that addresses those concerns.",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    }
+  },
+
+  "operations": {
+    "hours": {
+      "value": "24/7 online availability. Support inquiries handled Monday through Friday, 9 AM to 5 PM CST.",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    }
+  },
+
+  "services": [
+    {
+      "name": "Protocol Specification (v3.0)",
+      "description": "Open specification defining the agent-facts.json and agent-facts.html standard for structured business facts. Free to use, no registration required.",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested",
+      "source_url": "https://agent-facts.com/agent-facts-protocol-v3.html"
+    },
+    {
+      "name": "Online Validator (planned)",
+      "description": "Planned tool at agent-facts.com/validate/ for checking conformance of agent-facts.json and agent-facts.html files.",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    },
+    {
+      "name": "CLI Tool - npx agent-facts init (planned)",
+      "description": "Planned CLI tool for generating agent-facts.json and agent-facts.html from interactive prompts.",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    },
+    {
+      "name": "Business Templates",
+      "description": "Example templates for local service, SaaS, and e-commerce business types.",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested",
+      "source_url": "https://agent-facts.com/"
+    }
+  ],
+
+  "pricing": {
+    "model": {
+      "value": "The protocol is free and open for all to use. No license fees, no registration required.",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested",
+      "source_url": "https://agent-facts.com/"
+    },
+    "starting_at": {
+      "value": "Free. Related audit tools via AgentReadyScan.com start at $149 for the Pro Fix Report.",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested",
+      "source_url": "https://agentreadyscan.com/"
+    }
+  },
+
+  "does_not_do": [
+    {
+      "statement": "Does not provide paid consulting services for implementing the protocol",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    },
+    {
+      "statement": "Does not guarantee AI rankings, search visibility improvements, or hallucination elimination",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    },
+    {
+      "statement": "Does not handle personal data, compliance audits, or legal advice",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "internal_policy"
+    },
+    {
+      "statement": "Does not install or host agent-facts files for third-party websites",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    },
+    {
+      "statement": "Is not an AI-agent identity, KYA, or governance framework - other projects using similar names address those areas; this protocol is strictly about business facts for AI retrieval",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested"
+    }
+  ],
+
+  "extended_facts": {
+    "protocol_status": {
+      "value": "Public Draft (Pre-RFC). Open for implementation by anyone.",
+      "last_updated": "2026-04-15T00:00:00Z",
+      "source_type": "owner_attested",
+      "source_url": "https://agent-facts.com/agent-facts-protocol-v3.html"
+    }
+  },
+
+  "changelog": [
+    {
+      "date": "2026-04-15",
+      "changes": "Published v3.0 specification. Introduced agent-facts.json as canonical format. Added provenance fields, per-fact freshness, conformance levels, and adoption roadmap."
+    },
+    {
+      "date": "2026-03-02",
+      "changes": "Published v2.2 specification."
+    }
+  ]
+}
