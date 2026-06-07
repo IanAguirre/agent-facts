@@ -5,26 +5,78 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="canonical" href="https://agent-facts.com/about.html">
-  <meta name="last-modified" content="2026-03-02">
-  <title>About Agent-Facts Protocol</title>
+  <meta name="description" content="The history, purpose, governance, and maintainership of the Agent-Facts Protocol, an open standard for publishing machine-readable business facts for AI retrieval.">
+  <meta name="last-modified" content="2026-06-07">
+  <meta name="agent-facts-protocol" content="3.0">
+  <meta name="agent-facts-protocol-url" content="https://agent-facts.com/agent-facts-protocol-v3.html">
+  <link rel="agent-facts" href="/agent-facts.json">
+  <title>About the Agent-Facts Protocol</title>
   <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "AboutPage",
-      "name": "About Agent-Facts Protocol",
-      "url": "https://agent-facts.com/about.html",
-      "description": "History and development of the Agent-Facts protocol.",
-      "dateModified": "2026-03-02"
+  {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "name": "About the Agent-Facts Protocol",
+    "url": "https://agent-facts.com/about.html",
+    "description": "The history, purpose, governance, and maintainership of the Agent-Facts Protocol.",
+    "dateModified": "2026-06-07",
+    "about": {
+      "@type": "CreativeWork",
+      "name": "Agent-Facts Protocol",
+      "version": "3.0",
+      "url": "https://agent-facts.com/",
+      "author": {
+        "@type": "Person",
+        "name": "Ian Aguirre"
+      }
     }
-    </script>
+  }
+  </script>
 </head>
 
 <body>
-  <h1>About Agent-Facts Protocol • Last updated: <time datetime="2026-03-02">March 2, 2026</time></h1>
-  <p>Developed by Ian Aguirre (founder of AgentReadyScan.com) in Chicago, with collaborative input from AI systems
-    including AIStudio, NotebookLM, Claude, Grok, and ChatGPT.</p>
-  <p>The protocol launched in 2026 to make websites AI-native, ensuring accurate data retrieval by LLMs.</p>
-  <p>Contact: audit@agentreadyscan.com | Back to <a href="/">Home</a></p>
+  <h1>About the Agent-Facts Protocol &bull; Last updated: <time datetime="2026-06-07">June 7, 2026</time></h1>
+
+  <p>Agent-Facts is an open standard for publishing a structured, machine-readable file of business facts that AI agents can retrieve and trust. The current version is v3.0, published April 15, 2026.</p>
+
+  <h2>The problem it solves</h2>
+  <p>AI systems routinely state business details that are wrong: outdated prices, hours that no longer apply, services a business does not offer, even a fabricated founder name. They do this because there is no reliable, structured source of truth for them to read, so they infer from scraped pages and stale training data. Agent-Facts gives a business one canonical file, hosted on its own domain, that answers the questions agents actually ask and records where each fact came from and when it was last verified.</p>
+
+  <h2>What it is, and what it is not</h2>
+  <p>Agent-Facts is the structured facts layer that an <code>llms.txt</code> file can point to. It is a static, zero-dependency data file any AI agent can parse today: the "what we do, what we charge, and what we explicitly do not do" source that prevents hallucination.</p>
+  <p>It is not a replacement for llms.txt, MCP, NLWeb, or WebMCP. It is not a universal verification or identity protocol, not a cryptographic trust chain, and not an AI-agent identity or governance framework. Other projects using similar names address those areas. Agent-Facts is strictly about business facts for AI retrieval.</p>
+
+  <h2>History</h2>
+  <dl>
+    <dt>v2.1 (early 2026)</dt>
+    <dd>The first published draft, distributed as a PDF specification. It established the core ideas: a clean, recency-stamped facts page and a mandatory section listing what a business does not do.</dd>
+
+    <dt>v2.2 (March 2, 2026)</dt>
+    <dd>Added stricter timestamp rules, provenance labels, a set of core required fields, anti-spam directives, and cross-file consistency requirements. A backward-compatible refinement ahead of the larger v3.0 overhaul.</dd>
+
+    <dt>v3.0 (April 15, 2026)</dt>
+    <dd>Introduced <code>agent-facts.json</code> as the canonical machine-readable format, with <code>agent-facts.html</code> as its human-readable projection. Added fact-level provenance and freshness, the twelve Golden Questions, three conformance levels (Minimal, Recommended, Full), and an adoption roadmap.</dd>
+  </dl>
+
+  <h2>How the specification is developed</h2>
+  <p>Agent-Facts v3.0 was developed and refined with input from multiple leading AI systems: Perplexity, Grok, Anthropic (Claude), Google (Gemini), OpenAI (ChatGPT), and Microsoft Copilot. The final v3.0 revision was prepared with Claude Opus 4.6. This multi-model approach is intentional: a protocol meant to be read by many different language models is more robust when those same models help shape how it is written and tested.</p>
+
+  <h2>Status and governance</h2>
+  <p>The protocol is a Public Draft (Pre-RFC) and is open for implementation by anyone. The specification is free to use with no license fees and no registration. Proposed changes are reviewed on a quarterly cycle. Suggestions and real-world implementation feedback are welcome by email.</p>
+
+  <h2>Maintainer</h2>
+  <p>The protocol is maintained by Ian Aguirre, founder of AgentReadyScan.com, based in Chicago, Illinois. The specification itself is independent and free. AgentReadyScan provides separate, optional tooling that helps businesses implement the protocol; the protocol does not require it.</p>
+
+  <h2>Reference</h2>
+  <ul>
+    <li><a href="/agent-facts-protocol-v3.html">Full specification (v3.0)</a></li>
+    <li><a href="/agent-facts.json">agent-facts.json (canonical data file)</a></li>
+    <li><a href="/agent-facts.html">agent-facts.html (human-readable projection)</a></li>
+    <li><a href="/agent-facts-protocol-v2.2.html">Previous specification (v2.2)</a></li>
+    <li><a href="/blog.html">Blog and updates</a></li>
+    <li><a href="https://github.com/IanAguirre/agent-facts">GitHub repository</a></li>
+  </ul>
+
+  <p>Contact: <a href="mailto:audit@agentreadyscan.com">audit@agentreadyscan.com</a> &bull; Back to <a href="/">Home</a></p>
 </body>
 
 </html>
