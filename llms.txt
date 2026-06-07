@@ -11,6 +11,9 @@ Agent-Facts defines a canonical JSON file (/agent-facts.json) and a human-readab
 - https://agent-facts.com/about.html : History, governance, and maintainership
 - https://agent-facts.com/blog.html : Release notes and updates
 
+## Tools
+- https://downloads.wordpress.org/plugin/agentreadyscan.1.0.7.zip : WordPress plugin (v1.0.7) — auto-generates agent-facts.json and agent-facts.html from existing site data
+
 ## Core Identity
 - Name: Agent-Facts Protocol
 - Description: Open standard for machine-readable business facts optimized for AI retrieval.
